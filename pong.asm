@@ -15,7 +15,7 @@ message:	dw 'Hello, world!', 0
 
 	global main
 
-	%define PLAYER_SPEED 10
+	%define PLAYER_SPEED 300
 
 	;; 
 	;; Raylib
@@ -76,21 +76,21 @@ main:
 
 	;; Update
 
-	%if 0
-
-	;; TODO: Make floating point multilication with integers!
-
 	call GetFrameTime
 
-	mov xmm1, PLAYER_SPEED
-	mulss xmm1, xmm0
-	%endif 
+	movss dword 4[rsp], xmm0 	; store delta time from GetFrameTime
+	mov dword 8[rsp], PLAYER_SPEED	; store player_speed
+
+	cvtsi2ss xmm0, dword 8[rsp]	; convert player_speed to floating-point
+	mulss xmm0, dword 4[rsp]	; actual floating-point multiplication
+
+	cvttss2si r10D, xmm0 	; convert floating-point result to integer
 
 	mov rcx, KEY_A
 	call IsKeyDown  ; bool IsKeyDown(int key) 
 	cmp rax, 0
 	je .main__L0
-	sub dword [player_x], PLAYER_SPEED
+	sub dword [player_x], r10D
 
 .main__L0:
 
@@ -98,7 +98,7 @@ main:
 	call IsKeyDown  ; bool IsKeyDown(int key) 
 	cmp rax, 0
 	je .main__L1
-	add dword [player_x], PLAYER_SPEED
+	add dword [player_x], r10D
 
 .main__L1:
 
