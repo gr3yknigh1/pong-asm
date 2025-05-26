@@ -42,7 +42,7 @@ def build(c: Context, build_type=default_build_type, clean=False, reconfigure=Fa
         build_env = msvc.extract_env_from_vcvars(c)
         save_env(cached_env, build_env)
 
-    pong_obj = configuration_folder("pong.obj")
+    pong_obj = c.join(configuration_folder(build_type), "pong.obj")
 
     nasm.assemble(
         c, (source_file("pong.asm"),),
