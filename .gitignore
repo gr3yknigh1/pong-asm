@@ -1,0 +1,34 @@
+
+# Build
+
+build/
+*.obj
+*.exe
+*.pdb
+*.ilk
+*.lib
+
+# Editors
+
+## Visual Studio
+
+.vs/
+
+## Vim
+
+*.swp
+
+## Emacs
+
+*~
+^#.*#$
+
+# Runtime
+
+## Python
+
+__pycache__/
+
+# Misc
+
+!raylib.lib
