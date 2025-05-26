@@ -23,6 +23,11 @@ build/
 *~
 ^#.*#$
 
+# Tools
+
+## RemedyBG
+*.rdbg
+
 # Runtime
 
 ## Python
