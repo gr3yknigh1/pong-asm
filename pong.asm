@@ -77,10 +77,65 @@ message:	dw 'Hello, world!', 0
 ; r9  | 6th
 ;
 
-main:
+	;; 
+	;; bool is_collided(int x0, int y0, int w0, int h0, int x1, int y1, int w1, int h1);
+	;; 
+	;; edi - x0
+	;; esi - y0
+	;; edx - w0
+	;; ecx - h0
+	;; r8D - x1
+	;; r9D - y1
+	;; 16[rsp] - w1
+	;; 20[rsp] - h1
+is_collided:	
 	push rbp
 	mov rbp, rsp
 	sub rsp, 64
+
+	mov r10D, 16[rbp] 	; w1
+	mov r11D, 20[rbp]	; h1
+
+	;; x0 + w0 >= x1 &&
+	;; x0 <= x1 + w1 &&
+	;; y0 + h0 >= y1 &&
+	;; y0 <= y1 + h1
+
+	add edi, edx
+	cmp edi, r8D
+	jl .is_collided__no_detected
+
+	sub edi, edx
+	add r8D, r10D
+	cmp edi, r8D
+	jg .is_collided__no_detected
+
+	add esi, ecx
+	cmp esi, r9D
+	jl .is_collided__no_detected
+
+	sub esi, ecx
+	add r9D, r11D
+	cmp esi, r9D
+	jg .is_collided__no_detected
+
+	mov rax, 1
+	jmp .is_collided__exit
+	
+.is_collided__no_detected:
+	mov rax, 0
+	jmp .is_collided__exit
+
+.is_collided__exit:	
+
+	add rsp, 64
+	pop rbp
+	ret
+
+main:
+	push rbp
+	mov rbp, rsp
+	sub rsp, 128
 
 	mov rcx, [window_w]
 	mov rdx, [window_h]
@@ -125,7 +180,33 @@ main:
 
 	mov r11D, dword 8[rsp]
 	imul r11D, [ball_dir_y]
-	add [ball_x], r11D
+	add [ball_y], r11D
+
+	;; 
+	;; Collision handling
+	;; (help me)
+	;; 
+
+	mov edi, dword [player_x]
+	mov esi, dword [player_y]
+	mov edx, dword [player_w]
+	mov ecx, dword [player_h]
+	mov r8D,  dword [ball_w]
+	mov r9D,  dword [ball_h]
+	mov dword 0[rsp], r8D
+	mov dword 4[rsp], r9D
+	mov r8D, dword [ball_x]
+	mov r9D, dword [ball_y]
+	call is_collided
+	cmp rax, 1
+	jne .main__L2
+
+	nop
+	nop
+	nop
+	nop
+
+.main__L2:
 
 	;; 
 	;; Handle input for player movement
@@ -186,6 +267,6 @@ main:
 	call CloseWindow
 	xor rax, rax
 
-	add rsp, 64
+	add rsp, 128
 	pop rbp
 	ret
